@@ -21,10 +21,12 @@ struct MiscEdgeTest {
 
 static void dmaPrefetch(u32* out);
 static void hblankBit(u32* out);
+static void dmaCountLatch(u32* out);
 
 static const struct MiscEdgeTest miscEdgeTests[] = {
 	{ "DMA Prefetch", dmaPrefetch, { "Break", "Read", 0 }, { 0x10002A64, 0xDEAD0000 } },
 	{ "H-blank bit start", hblankBit, { "Start", "Hblank", "Flip 1", "Flip 2", "Flip 3", "Flip 4", "Flip 5", "Flip 6", 0 }, { 0x1B, 0x4D1, 0x85, 0x3EC, 0xE4, 0x3EC, 0xE4, 0x3F5 } },
+	{ "DMA count latching", dmaCountLatch, { "First", "Reload", 0 }, { 1, 1 } },
 };
 
 static const u32 nTests = sizeof(miscEdgeTests) / sizeof(*miscEdgeTests);
@@ -110,6 +112,27 @@ void hblankBit(u32* out) {
 	REG_TM0CNT = 0;
 	REG_IE = ie;
 	REG_IME = 1;
+}
+
+void dmaCountLatch(u32* out) {
+	u16 src[32];
+	u16 dst = 0xFFFF;
+
+	int i;
+	for (i = 0; i < 32; ++i) {
+		src[i] = i;
+	}
+
+	REG_DMA3SAD = (u32) &src;
+	REG_DMA3DAD = (u32) &dst;
+	VBlankIntrWait();
+	REG_DMA3CNT = DMA_VBLANK | DMA16 | DMA_SRC_INC | DMA_DST_FIXED | 0x2;
+	*(vu16*)(REG_BASE + 0x0de) |= 0x8000;
+	*(vu16*)(REG_BASE + 0x0dc) = 0x4;
+	VBlankIntrWait();
+	out[0] = dst;
+	VBlankIntrWait();
+	out[1] = dst;
 }
 
 static void printResult(int offset, int line, const char* preface, u32 expected, u32 value) {
