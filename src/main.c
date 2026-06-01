@@ -29,11 +29,12 @@
 #include "timers.h"
 #include "video.h"
 
-u16* textBase = (u16*) VRAM;
+u16* textBase = (u16*) SCREEN_BASE_BLOCK(1);
 char textGrid[32 * 32];
 bool isMgba = false;
 
 const char savetype[] = "SRAM_V123";
+const u32 vramBase[] = { 0x50D0, 0x51D1, 0x52D2, 0x53D3, 0x54D4, 0x55D5, 0x56D6, 0x57D7 };
 
 EWRAM_DATA const int _anchor = 0xABAD1DEA; // There seems to be a bug in the ld script that this fixes
 IWRAM_DATA struct ActiveInfo activeTestInfo = { {'I', 'n', 'f', 'o'}, -1, -1, -1 };
@@ -214,8 +215,9 @@ int main(void) {
 	BG_PALETTE[0] = 0x7FFF;
 	BG_PALETTE[16] = 0x7FFF;
 	BG_PALETTE[17] = 0x1F;
+	memcpy((u16*) VRAM, vramBase, sizeof(vramBase));
 	DMA3COPY(fontTiles, TILE_BASE_ADR(1), DMA16 | DMA_IMMEDIATE | (fontTilesLen >> 1));
-	REG_BG1CNT = CHAR_BASE(1) | SCREEN_BASE(0);
+	REG_BG1CNT = CHAR_BASE(1) | SCREEN_BASE(1);
 	REG_BG1VOFS = -4;
 	memset(textGrid, 0, sizeof(textGrid));
 	strcpy(&textGrid[2], "Game Boy Advance Test Suite");
@@ -227,7 +229,10 @@ int main(void) {
 
 	irqEnable(IRQ_VBLANK);
 
-	bzero((u8*) SRAM, 0x10000);
+	int i;
+	for (i = 0; i < 0x10000; ++i) {
+		((u8*) SRAM)[i] = 0;
+	}
 	isMgba = mgba_open();
 	savprintf("Game Boy Advance Test Suite\n===");
 

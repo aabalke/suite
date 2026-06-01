@@ -421,7 +421,8 @@ static void testLoadBad(struct TestConfigurations* config) {
 
 __attribute__((noinline))
 static void testStore(struct TestConfigurations* config, u32* write, u32* read) {
-	const u32 original[2] = { read[0], read[1] };
+	const u32 original[2] = { write[0], write[1] };
+	const u32 omasked[2] = { ((u32*)((u32) write & 0x07FFFFFF))[0], ((u32*)((u32) write & 0x07FFFFFF))[1] };
 	write[0] = 0xAA55BB66;
 	write[1] = 0x88339944;
 	const u32 test[2] = { 0xA5B6C7D8, 0x94837261 };
@@ -683,6 +684,8 @@ static void testStore(struct TestConfigurations* config, u32* write, u32* read) 
 
 	write[0] = original[0];
 	write[1] = original[1];
+	((u32*)((u32) write & 0x07FFFFFF))[0] = omasked[0];
+	((u32*)((u32) write & 0x07FFFFFF))[1] = omasked[1];
 	activeTestInfo.subtestId = -1;
 }
 
@@ -1065,7 +1068,7 @@ static const struct MemoryTest memoryTests[] = {
 	}},
 	{ "SRAM load", testLoadSRAM, false, {
 		0x47, 0x47, 0x4747, 0x61000061, 0x4747, 0x61, 0x47474747, 0x61616161, 0x6D6D6D6D, 0x65656565,
-		0, 0, 0, 0, 0, 0,
+		0x50D0, 0x50D0, 0x50D0, 0x50D0, 0x50D0, 0x50D0,
 		0x4747, 0x4747, 0x47474747, 0x47474747, 0x47474747, 0x47474747,
 		0x4747, 0x4747, 0x47474747, 0x47474747, 0x47474747, 0x47474747,
 		0x4747, 0x4747, 0x47474747, 0x47474747, 0x47474747, 0x47474747,
