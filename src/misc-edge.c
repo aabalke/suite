@@ -24,7 +24,7 @@ static void hblankBit(u32* out);
 static void dmaCountLatch(u32* out);
 
 static const struct MiscEdgeTest miscEdgeTests[] = {
-	{ "DMA Prefetch", dmaPrefetch, { "Break", "Read", 0 }, { 0x10002A64, 0xDEAD0000 } },
+	{ "DMA Prefetch", dmaPrefetch, { "Break", "Read", 0 }, { 0x10002A94, 0xDEAD0000 } },
 	{ "H-blank bit start", hblankBit, { "Start", "Hblank", "Flip 1", "Flip 2", "Flip 3", "Flip 4", "Flip 5", "Flip 6", 0 }, { 0x1B, 0x4D1, 0x85, 0x3EC, 0xE4, 0x3EC, 0xE4, 0x3F5 } },
 	{ "DMA count latching", dmaCountLatch, { "First", "Reload", 0 }, { 1, 5 } },
 };
@@ -38,7 +38,7 @@ EWRAM_DATA static bool results[sizeof(miscEdgeTests) / sizeof(*miscEdgeTests)];
 void dmaPrefetch(u32* out) {
 	u32* ptr = (u32*) 0x10000000;
 	out[0] = 0;
-	u32 a[8] = { 0xDEAD0000, 0xDEAD0001, 0xDEAD0002, 0xDEAD0003, 0xDEAD0004, 0xDEAD0005, 0xDEAD0006, 0xDEAD0007 };
+	vu32 a[8] = { 0xDEAD0000, 0xDEAD0001, 0xDEAD0002, 0xDEAD0003, 0xDEAD0004, 0xDEAD0005, 0xDEAD0006, 0xDEAD0007 };
 	u32 b[8] = { 0 };
 	DMA3COPY(&a, &b, DMA_HBLANK | DMA_SRC_FIXED | DMA_DST_FIXED | DMA_REPEAT | DMA32 | 1);
 	VBlankIntrWait();
@@ -48,10 +48,9 @@ void dmaPrefetch(u32* out) {
 		u32 value = *ptr;
 		++ptr;
 		out[1] = value;
-		if (value != 0x428A428A) {
+		if ((value & 0xFFC0FFC0) != 0x40004000) {
 			out[0] = (u32) ptr;
-			REG_DMA3CNT = 0;
-			return;
+			break;
 		}
 	}
 	REG_DMA3CNT = 0;
