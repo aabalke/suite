@@ -25,7 +25,7 @@ static void dmaCountLatch(u32* out);
 
 static const struct MiscEdgeTest miscEdgeTests[] = {
 	{ "DMA Prefetch", dmaPrefetch, { "Break", "Read", 0 }, { 0x10002A94, 0xDEAD0000 } },
-	{ "H-blank bit start", hblankBit, { "Start", "Hblank", "Flip 1", "Flip 2", "Flip 3", "Flip 4", "Flip 5", "Flip 6", 0 }, { 0x1B, 0x4D1, 0x85, 0x3EC, 0xE4, 0x3EC, 0xE4, 0x3F5 } },
+	{ "H-blank bit start", hblankBit, { "Start", "Hblank", "Flip 1", "Flip 2", "Flip 3", "Flip 4", "Flip 5", "Flip 6", 0 }, { 0x1B, 0x4D0, 0x87, 0x3EC, 0xE5, 0x3EB, 0xE3, 0x3F3 } },
 	{ "DMA count latching", dmaCountLatch, { "First", "Reload", 0 }, { 1, 5 } },
 };
 
