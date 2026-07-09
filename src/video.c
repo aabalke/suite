@@ -775,7 +775,7 @@ static void showVideoSuite(size_t index) {
 	memset((void*) 0x06000500, 0, 0x300);
 	REG_DISPCNT = dispcnt;
 	REG_DISPSTAT &= ~0x0030;
-	REG_BG1CNT = CHAR_BASE(1) | SCREEN_BASE(0);
+	REG_BG1CNT = CHAR_BASE(1) | SCREEN_BASE(1);
 	REG_BG1VOFS = -4;
 	irqDisable(IRQ_VCOUNT | IRQ_HBLANK);
 	irqInit();
